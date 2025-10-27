@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\HTML2EXCEL.Domain\HTML2EXCEL.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
