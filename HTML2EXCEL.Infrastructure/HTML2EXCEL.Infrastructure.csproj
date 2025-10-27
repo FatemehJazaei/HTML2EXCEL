@@ -6,4 +6,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Polly" Version="7.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HTML2EXCEL.Application\HTML2EXCEL.Application.csproj" />
+    <ProjectReference Include="..\HTML2EXCEL.Domain\HTML2EXCEL.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
