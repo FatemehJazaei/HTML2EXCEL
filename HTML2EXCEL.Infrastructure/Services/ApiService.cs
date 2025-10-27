@@ -1,4 +1,4 @@
-﻿using HTML2EXCEL.Application.Interfaces;
+﻿using HTML2EXCEL.Domain.Interfaces;
 using HTML2EXCEL.Infrastructure.Config;
 using System;
 using System.Net.Http;

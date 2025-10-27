@@ -1,5 +1,5 @@
 ﻿using ClosedXML.Excel;
-using HTML2EXCEL.Application.Interfaces;
+using HTML2EXCEL.Domain.Interfaces;
 using HTML2EXCEL.Domain.Entities;
 using System;
 using System.Collections.Generic;

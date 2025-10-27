@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HTML2EXCEL.Application.Interfaces
+namespace HTML2EXCEL.Domain.Interfaces
 {
     public interface IHtmlParser
     {
