@@ -11,7 +11,7 @@ namespace HTML2EXCEL.Infrastructure.Services
 {
     public class ExcelExporter : IExcelExporter
     {
-        public async Task ExportAsync(string tables, string outputPath)
+        public async Task ExportAsync(byte[]  tables, string outputPath)
         {
 
             if (tables == null )

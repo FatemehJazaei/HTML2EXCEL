@@ -57,5 +57,16 @@ namespace HTML2EXCEL.Infrastructure.Services
             var obj = JsonDocument.Parse(json);
             return obj.RootElement.GetProperty("path").GetString()!;
         }
+
+        public async Task<byte[]> DownloadExcelFileAsync(string token, string filePath)
+        {
+            var url = $"{_settings.BaseUrl}/{filePath}";
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await _httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsByteArrayAsync();
+        }
     }
 }

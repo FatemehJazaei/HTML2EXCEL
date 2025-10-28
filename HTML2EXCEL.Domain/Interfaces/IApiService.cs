@@ -17,11 +17,18 @@ namespace HTML2EXCEL.Domain.Interfaces
         Task<string> GetModelAsync(string token, int tableTemplateId);
 
         /// <summary>
-        /// Uses the given key to get a downloadable Excel file URL.
+        /// Uses the given key to get a downloadable Excel file Path.
         /// </summary>
         /// <param name="token">Authentication token</param>
         /// <param name="model">Previously obtained key</param>
-        /// <returns>Excel file URL</returns>
+        /// <returns>Excel file Path</returns>
         Task<string> GetFilePathAsync(string token, string model);
+        /// <summary>
+        /// Uses the given Path to get a downloadable Excel file .
+        /// </summary>
+        /// <param name="token">Authentication token</param>
+        /// <param name="filePath">Excel file Path</param>
+        /// <returns>Excel file </returns>
+        Task<byte[]> DownloadExcelFileAsync(string token, string filePath);
     }
 }

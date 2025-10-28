@@ -14,6 +14,6 @@ namespace HTML2EXCEL.Domain.Interfaces
         /// </summary>
         /// <param name="tables">List of TableData to export</param>
         /// <param name="outputPath">Full file path for Excel output</param>
-        Task ExportAsync(string tables, string outputPath);
+        Task ExportAsync(byte[] tables, string outputPath);
     }
 }

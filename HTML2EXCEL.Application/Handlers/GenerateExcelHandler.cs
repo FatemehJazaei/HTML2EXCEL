@@ -38,9 +38,10 @@ namespace HTML2EXCEL.Application.Handlers
                 var token = await _authService.GetAccessTokenAsync(request.Username, request.Password, request.CompanyId, request.PeriodId);
                 var model = await _apiService.GetModelAsync(token, request.TableTemplateId);
                 var path = await _apiService.GetFilePathAsync(token, model);
-                var htmlContent = await new HttpClient().GetStringAsync(path);
 
-                if (htmlContent == null )
+                var fileBytes = await _apiService.DownloadExcelFileAsync(token, path);
+
+                if (fileBytes == null )
                 {
                     return new HtmlToExcelResult
                     {
@@ -50,7 +51,7 @@ namespace HTML2EXCEL.Application.Handlers
                 }
 
                 // Export to Excel
-                await _excelExporter.ExportAsync(htmlContent, request.OutputPath);
+                await _excelExporter.ExportAsync(fileBytes, request.OutputPath);
 
                 return new HtmlToExcelResult
                 {
