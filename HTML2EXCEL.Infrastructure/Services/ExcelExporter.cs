@@ -11,9 +11,10 @@ namespace HTML2EXCEL.Infrastructure.Services
 {
     public class ExcelExporter : IExcelExporter
     {
-        public async Task ExportAsync(List<TableData> tables, string outputPath)
+        public async Task ExportAsync(string tables, string outputPath)
         {
-            if (tables == null || tables.Count == 0)
+
+            if (tables == null )
                 throw new ArgumentException("No table data provided for export.");
 
             var directory = Path.GetDirectoryName(outputPath);
@@ -22,6 +23,7 @@ namespace HTML2EXCEL.Infrastructure.Services
 
             using var workbook = new XLWorkbook();
 
+            /*
             foreach (var table in tables)
             {
                 var sheetName = GetValidSheetName(table.Name);
@@ -54,24 +56,27 @@ namespace HTML2EXCEL.Infrastructure.Services
 
                 worksheet.Columns().AdjustToContents();
             }
+            */
 
             using var stream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, useAsync: true);
             workbook.SaveAs(stream);
 
             await stream.FlushAsync();
+
         }
 
         private string GetValidSheetName(string name)
         {
+            /*
             if (string.IsNullOrWhiteSpace(name))
                 name = "Sheet";
 
             name = name.Length > 31 ? name.Substring(0, 31) : name;
-
+            
 
             foreach (var invalidChar in Path.GetInvalidFileNameChars())
                 name = name.Replace(invalidChar.ToString(), "_");
-
+            */
             return name;
         }
     }

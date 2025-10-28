@@ -1,6 +1,6 @@
 ﻿using HTML2EXCEL.Application.DTOs;
-using HTML2EXCEL.Application.Interfaces;
 using HTML2EXCEL.Domain.Entities;
+using HTML2EXCEL.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,22 +35,12 @@ namespace HTML2EXCEL.Application.Handlers
         {
             try
             {
-                // Authentication
-                var token = await _authService.GetAccessTokenAsync(request.Username, request.Password);
+                var token = await _authService.GetAccessTokenAsync(request.Username, request.Password, request.CompanyId, request.PeriodId);
+                var model = await _apiService.GetModelAsync(token, request.TableTemplateId);
+                var path = await _apiService.GetFilePathAsync(token, model);
+                var htmlContent = await new HttpClient().GetStringAsync(path);
 
-                // Call API to get data key
-                var dataKey = await _apiService.GetDataKeyAsync(token);
-
-                // Get Excel URL (or HTML)
-                var excelUrl = await _apiService.GetExcelUrlAsync(token, dataKey);
-
-
-                var htmlContent = await new System.Net.Http.HttpClient().GetStringAsync(excelUrl);
-
-                // Parse HTML tables
-                List<TableData> tables = await _htmlParser.ParseTablesAsync(htmlContent);
-
-                if (tables == null || tables.Count == 0)
+                if (htmlContent == null )
                 {
                     return new HtmlToExcelResult
                     {
@@ -60,7 +50,7 @@ namespace HTML2EXCEL.Application.Handlers
                 }
 
                 // Export to Excel
-                await _excelExporter.ExportAsync(tables, request.OutputPath);
+                await _excelExporter.ExportAsync(htmlContent, request.OutputPath);
 
                 return new HtmlToExcelResult
                 {

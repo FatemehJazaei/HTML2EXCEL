@@ -1,10 +1,12 @@
-﻿using HTML2EXCEL.Domain.Interfaces;
+﻿using DocumentFormat.OpenXml.Drawing.Charts;
+using HTML2EXCEL.Domain.Interfaces;
 using HTML2EXCEL.Infrastructure.Config;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace HTML2EXCEL.Infrastructure.Services
@@ -12,45 +14,33 @@ namespace HTML2EXCEL.Infrastructure.Services
     public class AuthService : IAuthService
     {
         private readonly HttpClient _httpClient;
-        private readonly ApiSettings _apiSettings;
+        private readonly ApiSettings _settings;
 
-        private string? _cachedToken;
-
-        public AuthService(HttpClient httpClient, ApiSettings apiSettings)
+        public AuthService(HttpClient httpClient, ApiSettings settings)
         {
             _httpClient = httpClient;
-            _apiSettings = apiSettings;
+            _settings = settings;
         }
 
-        public async Task<string> GetAccessTokenAsync(string username, string password)
+        public async Task<string> GetAccessTokenAsync(string username, string password,int companyId ,int periodId)
         {
+            var url = $"{_settings.BaseUrl}/{_settings.AuthEndpoint}";
 
-            if (!string.IsNullOrEmpty(_cachedToken))
-                return _cachedToken;
-
-            var request = new
+            var payload = new
             {
-                username,
-                password
+                UserName = username,
+                Password = password,
+                CompanyId = companyId,
+                PeriodId = periodId
             };
 
-            var response = await _httpClient.PostAsJsonAsync(_apiSettings.AuthEndpoint, request);
+            var response = await _httpClient.PostAsJsonAsync(url, payload);
             response.EnsureSuccessStatusCode();
 
-            var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
+            var json = await response.Content.ReadAsStringAsync();
 
-            if (result == null || string.IsNullOrEmpty(result.Token))
-                throw new System.Exception("Failed to get auth token.");
-
-            _cachedToken = result.Token;
-
-            return _cachedToken;
-        }
-
-        private class AuthResponse
-        {
-            public string Token { get; set; } = string.Empty;
-            public int ExpiresIn { get; set; }
+            var obj = JsonDocument.Parse(json);
+            return obj.RootElement.GetProperty("Token").GetString()!;
         }
     }
 }

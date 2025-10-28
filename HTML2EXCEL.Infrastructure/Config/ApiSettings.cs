@@ -9,9 +9,11 @@ namespace HTML2EXCEL.Infrastructure.Config
     public class ApiSettings
     {
         public string BaseUrl { get; set; } = string.Empty;
-        public string AuthEndpoint { get; set; } = "/auth/token";
-        public string DataKeyEndpoint { get; set; } = "/api/data/key";
-        public string ExcelUrlEndpoint { get; set; } = "/api/data/excel";
+        public string AuthEndpoint { get; set; } = string.Empty;
+        public string ModelEndpoint { get; set; } = string.Empty;
+        public string PathEndpoint { get; set; } = string.Empty;
+
+        public int ControllerName { get; set; } = 20;
         public int RetryCount { get; set; } = 3;
         public int RetryDelaySeconds { get; set; } = 2;
     }

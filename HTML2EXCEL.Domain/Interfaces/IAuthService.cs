@@ -14,6 +14,6 @@ namespace HTML2EXCEL.Domain.Interfaces
         /// <param name="username">Username or API key</param>
         /// <param name="password">Password or secret</param>
         /// <returns>Access token string</returns>
-        Task<string> GetAccessTokenAsync(string username, string password);
+        Task<string> GetAccessTokenAsync(string username, string password, int companyId, int periodId);
     }
 }

@@ -6,60 +6,56 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Polly;
 using Polly.Retry;
+using System.Net.Http.Headers;
+using System.Text.Json;
 
 namespace HTML2EXCEL.Infrastructure.Services
 {
     public class ApiService : IApiService
     {
         private readonly HttpClient _httpClient;
-        private readonly ApiSettings _apiSettings;
-        private readonly AsyncRetryPolicy _retryPolicy;
+        private readonly ApiSettings _settings;
 
-        public ApiService(HttpClient httpClient, ApiSettings apiSettings)
+        public ApiService(HttpClient httpClient, ApiSettings settings)
         {
             _httpClient = httpClient;
-            _apiSettings = apiSettings;
-
-            _retryPolicy = Policy
-                .Handle<HttpRequestException>()
-                .WaitAndRetryAsync(
-                    retryCount: _apiSettings.RetryCount,
-                    sleepDurationProvider: attempt => TimeSpan.FromSeconds(Math.Pow(_apiSettings.RetryDelaySeconds, attempt))
-                );
+            _settings = settings;
         }
 
-        public async Task<string> GetDataKeyAsync(string token)
+        public async Task<string> GetModelAsync(string token, int tableTemplateId)
         {
-            return await _retryPolicy.ExecuteAsync(async () =>
+            var url = $"{_settings.BaseUrl}/{_settings.ModelEndpoint}";
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var payload = new
             {
-                using var request = new HttpRequestMessage(HttpMethod.Get, _apiSettings.DataKeyEndpoint);
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                controllerName = _settings.ControllerName, 
+                inputData = new
+                {
+                    tableTemplateId = tableTemplateId,
+                    idList = Array.Empty<int>()
+                }
+            };
 
-                var response = await _httpClient.SendAsync(request);
-                response.EnsureSuccessStatusCode();
+            var response = await _httpClient.PostAsJsonAsync(url, payload);
+            response.EnsureSuccessStatusCode();
 
-                var result = await response.Content.ReadFromJsonAsync<DataKeyResponse>();
-                return result?.DataKey ?? throw new Exception("Data key not returned.");
-            });
+            var json = await response.Content.ReadAsStringAsync();
+            var obj = JsonDocument.Parse(json);
+            return obj.RootElement.GetProperty("model").GetString()!;
         }
 
-        public async Task<string> GetExcelUrlAsync(string token, string dataKey)
+        public async Task<string> GetFilePathAsync(string token, string model)
         {
-            return await _retryPolicy.ExecuteAsync(async () =>
-            {
-                var endpoint = $"{_apiSettings.ExcelUrlEndpoint}?key={dataKey}";
-                using var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var url = $"{_settings.BaseUrl}/{_settings.PathEndpoint}/{model}";
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                var response = await _httpClient.SendAsync(request);
-                response.EnsureSuccessStatusCode();
+            var response = await _httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
 
-                var result = await response.Content.ReadFromJsonAsync<ExcelUrlResponse>();
-                return result?.Url ?? throw new Exception("Excel URL not returned.");
-            });
+            var json = await response.Content.ReadAsStringAsync();
+            var obj = JsonDocument.Parse(json);
+            return obj.RootElement.GetProperty("path").GetString()!;
         }
-
-        private record DataKeyResponse(string DataKey);
-        private record ExcelUrlResponse(string Url);
     }
 }

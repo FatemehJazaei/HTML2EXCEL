@@ -12,5 +12,8 @@ namespace HTML2EXCEL.Application.DTOs
         public string OutputPath { get; set; } = "output.xlsx";
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+        public int CompanyId { get; set; } = 1;
+        public int PeriodId { get; set; } = 1;
+        public int TableTemplateId { get; set; }
     }
 }
