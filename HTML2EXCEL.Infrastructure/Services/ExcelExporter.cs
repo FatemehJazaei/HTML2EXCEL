@@ -11,73 +11,41 @@ namespace HTML2EXCEL.Infrastructure.Services
 {
     public class ExcelExporter : IExcelExporter
     {
-        public async Task ExportAsync(byte[]  tables, string outputPath)
+        private readonly XLWorkbook _workbook;
+        private readonly IXLWorksheet _sheet;
+
+        public ExcelExporter()
         {
-
-            if (tables == null )
-                throw new ArgumentException("No table data provided for export.");
-
-            var directory = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-                Directory.CreateDirectory(directory);
-
-            using var workbook = new XLWorkbook();
-
-            /*
-            foreach (var table in tables)
-            {
-                var sheetName = GetValidSheetName(table.Name);
-                var worksheet = workbook.Worksheets.Add(sheetName);
-
-                int currentRow = 1;
-
-                if (table.Headers != null && table.Headers.Count > 0)
-                {
-                    for (int i = 0; i < table.Headers.Count; i++)
-                    {
-                        worksheet.Cell(currentRow, i + 1).Value = table.Headers[i];
-                        worksheet.Cell(currentRow, i + 1).Style.Font.Bold = true;
-                        worksheet.Cell(currentRow, i + 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                    }
-                    currentRow++;
-                }
-
-                if (table.Rows != null)
-                {
-                    foreach (var row in table.Rows)
-                    {
-                        for (int i = 0; i < row.Count; i++)
-                        {
-                            worksheet.Cell(currentRow, i + 1).Value = row[i];
-                        }
-                        currentRow++;
-                    }
-                }
-
-                worksheet.Columns().AdjustToContents();
-            }
-            */
-
-            using var stream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, useAsync: true);
-            workbook.SaveAs(stream);
-
-            await stream.FlushAsync();
-
+            _workbook = new XLWorkbook();
+            _sheet = _workbook.Worksheets.Add("Report");
         }
 
-        private string GetValidSheetName(string name)
+        public Task<MemoryStream> CreateWorkbookAsync()
+            => Task.FromResult(new MemoryStream());
+
+        public async Task<int> WriteTextAsync(string text, int row)
         {
-            /*
-            if (string.IsNullOrWhiteSpace(name))
-                name = "Sheet";
+            _sheet.Cell(row, 1).Value = text;
+            _sheet.Cell(row, 1).Style.Font.Bold = false;
+            return await Task.FromResult(row + 1);
+        }
 
-            name = name.Length > 31 ? name.Substring(0, 31) : name;
-            
+        public async Task<int> WriteTableAsync(List<List<string>> data, int startRow)
+        {
+            int r = startRow;
+            foreach (var row in data)
+            {
+                for (int c = 0; c < row.Count; c++)
+                    _sheet.Cell(r, c + 1).Value = row[c];
+                r++;
+            }
+            return await Task.FromResult(r + 1);
+        }
 
-            foreach (var invalidChar in Path.GetInvalidFileNameChars())
-                name = name.Replace(invalidChar.ToString(), "_");
-            */
-            return name;
+        public async Task SaveAsync(MemoryStream stream, string path)
+        {
+            _workbook.SaveAs(path);
+            await Task.CompletedTask;
         }
     }
 }

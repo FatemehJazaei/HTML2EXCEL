@@ -28,10 +28,10 @@ namespace HTML2EXCEL.Infrastructure.Services
 
             var payload = new
             {
-                UserName = username,
-                Password = password,
-                CompanyId = companyId,
-                PeriodId = periodId
+                userName = username,
+                password = password
+                //CompanyId = companyId,
+                //PeriodId = periodId
             };
 
             var response = await _httpClient.PostAsJsonAsync(url, payload);

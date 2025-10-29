@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HTML2EXCEL.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,5 +31,6 @@ namespace HTML2EXCEL.Domain.Interfaces
         /// <param name="filePath">Excel file Path</param>
         /// <returns>Excel file </returns>
         Task<byte[]> DownloadExcelFileAsync(string token, string filePath);
+
     }
 }

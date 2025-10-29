@@ -14,6 +14,7 @@ namespace HTML2EXCEL.Domain.Interfaces
         /// </summary>
         /// <param name="htmlContent">Raw HTML string</param>
         /// <returns>List of TableData entities</returns>
-        Task<List<TableData>> ParseTablesAsync(string htmlContent);
+        Task<MemoryStream> ParseTablesAsync(string htmlContent, string token, IApiService apiService,
+        IExcelExporter excelExporter);
     }
 }

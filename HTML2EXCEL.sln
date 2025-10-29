@@ -25,7 +25,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HTML2EXCEL.Infrastructure",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HTML2EXCEL.Persistence", "HTML2EXCEL.Persistence\HTML2EXCEL.Persistence.csproj", "{7371090B-15DF-44D9-B813-81DC85723F0F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTML2EXCEL.ConsoleApp", "HTML2EXCEL.ConsoleApp\HTML2EXCEL.ConsoleApp.csproj", "{712D01BD-3249-469B-A63F-D6ED1BA88F6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HTML2EXCEL.ConsoleApp", "HTML2EXCEL.ConsoleApp\HTML2EXCEL.ConsoleApp.csproj", "{712D01BD-3249-469B-A63F-D6ED1BA88F6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -8,6 +8,7 @@ using Polly;
 using Polly.Retry;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using HTML2EXCEL.Domain.Entities;
 
 namespace HTML2EXCEL.Infrastructure.Services
 {
