@@ -30,7 +30,7 @@ namespace HTML2EXCEL.Infrastructure.Services
 
             var payload = new
             {
-                controllerName = _settings.ControllerName, 
+                controllerName = _settings.ControllerName,
                 inputData = new
                 {
                     tableTemplateId = tableTemplateId,
@@ -38,7 +38,12 @@ namespace HTML2EXCEL.Infrastructure.Services
                 }
             };
 
-            var response = await _httpClient.PostAsJsonAsync(url, payload);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            var response = await _httpClient.PostAsJsonAsync(url, payload, options);
             response.EnsureSuccessStatusCode();
 
             var json = await response.Content.ReadAsStringAsync();
@@ -55,13 +60,14 @@ namespace HTML2EXCEL.Infrastructure.Services
             response.EnsureSuccessStatusCode();
 
             var json = await response.Content.ReadAsStringAsync();
-            var obj = JsonDocument.Parse(json);
-            return obj.RootElement.GetProperty("path").GetString()!;
+            var path = JsonSerializer.Deserialize<string>(json);
+
+            return path!;
         }
 
         public async Task<byte[]> DownloadExcelFileAsync(string token, string filePath)
         {
-            var url = $"{_settings.BaseUrl}/{filePath}";
+            var url = $"{_settings.BaseUrl}{filePath}";
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var response = await _httpClient.GetAsync(url);
