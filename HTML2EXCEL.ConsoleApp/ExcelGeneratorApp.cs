@@ -57,6 +57,7 @@ namespace HTML2EXCEL.ConsoleApp
                     services.AddSingleton<IHtmlParser, HtmlParser>();
                     services.AddSingleton<IExcelExporter, ExcelExporter>();
                     services.AddScoped<IHtmlRepository, HtmlRepository>();
+                    services.AddScoped<ITableTemplateRepository, TableTemplateRepository>();
                     services.AddSingleton<GenerateExcelHandler>();
 
                     services.Configure<HtmlProcessingSettings>(
