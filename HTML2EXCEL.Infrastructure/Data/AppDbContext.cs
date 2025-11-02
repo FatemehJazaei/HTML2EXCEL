@@ -11,6 +11,7 @@ namespace HTML2EXCEL.Infrastructure.Data
     public class AppDbContext : DbContext
     {
         public DbSet<HtmlContentEntity> HtmlContents { get; set; }
+        public DbSet<TableTemplate> TableTemplates { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
@@ -27,12 +28,32 @@ namespace HTML2EXCEL.Infrastructure.Data
         {
             modelBuilder.Entity<HtmlContentEntity>()
                         .ToTable("FinancialStatements")          
-                        .HasKey(x => x.Id);               
+                        .HasKey(x => x.Id);
 
             modelBuilder.Entity<HtmlContentEntity>()
                         .Property(x => x.Html)
-                        .HasColumnName("Pages")           
+                        .HasColumnName("Pages")
                         .IsRequired();
+
+            modelBuilder.Entity<TableTemplate>()
+                       .Property(x => x.Id)
+                       .HasColumnName("ReportTemplateId");
+
+            modelBuilder.Entity<TableTemplate>()
+                        .ToTable("ReportContents")
+                        .HasKey(x => x.Id);
+
+             modelBuilder.Entity<TableTemplate>()
+                        .Property(x => x.Rows)
+                        .HasColumnName("Rows")
+                        .IsRequired();
+
+            modelBuilder.Entity<TableTemplate>()
+                        .Property(x => x.Cols)
+                        .HasColumnName("Cols")
+                        .IsRequired();
+
+
         }
     }
 }
