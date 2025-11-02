@@ -29,18 +29,18 @@ namespace HTML2EXCEL.Infrastructure.Services
             var payload = new
             {
                 userName = username,
-                password = password
-                //CompanyId = companyId,
-                //PeriodId = periodId
+                password = password,
+                companyId = companyId,
+                periodId = periodId
             };
 
             var response = await _httpClient.PostAsJsonAsync(url, payload);
             response.EnsureSuccessStatusCode();
 
             var json = await response.Content.ReadAsStringAsync();
+            var token = JsonSerializer.Deserialize<string>(json);
 
-            var obj = JsonDocument.Parse(json);
-            return obj.RootElement.GetProperty("Token").GetString()!;
+            return token!;
         }
     }
 }
