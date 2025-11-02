@@ -19,6 +19,7 @@ namespace HTML2EXCEL.Application.Handlers
         private readonly IApiService _apiService;
         private readonly IHtmlParser _htmlParser;
         private readonly IExcelExporter _excelExporter;
+        private readonly ITableTemplateRepository _tableTemplateRepository;
         private readonly HtmlProcessingSettings _settings;
 
         public GenerateExcelHandler(
@@ -27,6 +28,7 @@ namespace HTML2EXCEL.Application.Handlers
             IHtmlParser htmlParser,
             IExcelExporter excelExporter,
             IHtmlRepository htmlRepository,
+            ITableTemplateRepository tableTemplateRepository,
             IOptions<HtmlProcessingSettings> options)
         {
             _authService = authService;
@@ -34,6 +36,7 @@ namespace HTML2EXCEL.Application.Handlers
             _htmlParser = htmlParser;
             _excelExporter = excelExporter;
             _htmlRepository = htmlRepository;
+            _tableTemplateRepository = tableTemplateRepository;
             _settings = options.Value;
         }
 
@@ -52,7 +55,7 @@ namespace HTML2EXCEL.Application.Handlers
                 var excelStream = await _excelExporter.CreateWorkbookAsync();
 
 
-                await _htmlParser.ParseTablesAsync(htmlContent, token,  _apiService, _excelExporter);
+                excelStream = await _htmlParser.ParseTablesAsync(htmlContent, token,  _apiService, _excelExporter, _tableTemplateRepository);
 
  
                 await _excelExporter.SaveAsync(excelStream, request.OutputPath);
