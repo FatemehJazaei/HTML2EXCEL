@@ -86,10 +86,12 @@ namespace HTML2EXCEL.Infrastructure.Services
                     {
                         var model = await _apiService.GetModelAsync(token, tableTemplateId);
                         var filePath = await _apiService.GetFilePathAsync(token, model);
-                        var (rows, cols) = await _tableTemplateRepository.GetRowANDColCountAsync(tableTemplateId);
+                        //var (rows, cols) = await _tableTemplateRepository.GetRowANDColCountAsync(tableTemplateId);
                         var excelBytes = await _apiService.DownloadExcelFileAsync(token, filePath);
-                        var tableData = await ExtractTopLeftCells(excelBytes, rows, cols);
-                        WriteTableToExcel(tableData, sheet, ref currentRow);
+                        //var outputFilePath = Path.Combine("output", $"Table_{tableTemplateId}.xlsx");
+                        //await File.WriteAllBytesAsync(outputFilePath, excelBytes);
+
+                        WriteTableToExcel(excelBytes, sheet, ref currentRow );
                     }
                 }
 
@@ -106,7 +108,7 @@ namespace HTML2EXCEL.Infrastructure.Services
                         foreach (var kv in styleP)
                             combined[kv.Key] = kv.Value;
 
-                    foreach (var span in element.Descendants("span").Where(s => s.ParentNode.Name != "span"))
+                    foreach (var span in element.Descendants("span").Where(s => s.ParentNode.Name != "span" && s.ParentNode.Name != "u"))
                     {
                         ProcessSpan(span, sheet, ref currentRow, combined);
                     }
@@ -121,59 +123,7 @@ namespace HTML2EXCEL.Infrastructure.Services
                 }
 
             }
-        }
-
-        /*
-        private async Task ReadDOM(IXLWorksheet sheet, HtmlNode page, string token, IApiService _apiService)
-        {
-            int currentRow = 1;
-
-            foreach (var div in page.SelectNodes(".//div") ?? Enumerable.Empty<HtmlNode>())
-            {
-                var styleDiv = ParseStyle(GetStyle(div));
-                foreach (var element in div.ChildNodes.Where(n => n.NodeType == HtmlNodeType.Element))
-                {
-                    if (element.GetAttributeValue("class", "").Contains("table-templateId"))
-                    {
-                        var tableNode = element.SelectSingleNode(".//div[contains(@class, 'table-templateId')]");
-                        if (tableNode != null)
-                        {
-                            var idValue = tableNode.GetAttributeValue("data-id", null);
-                            if (int.TryParse(idValue, out int tableTemplateId))
-                            {
-                                var model = await _apiService.GetModelAsync(token, tableTemplateId);
-                                var filePath = await _apiService.GetFilePathAsync(token, model);
-                                var excelBytes = await _apiService.DownloadExcelFileAsync(token, filePath);
-                                var tableData = await ExtractTopLeftCells(excelBytes);
-                                WriteTableToExcel(tableData, sheet, ref currentRow);
-                            }
-                        }
-                    }
-                    else if (element.Name == "p")
-                    {
-                        var combined = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                        var styleP = ParseStyle(GetStyle(element));
-
-                        if (styleDiv != null)
-                            foreach (var kv in styleDiv)
-                                combined[kv.Key] = kv.Value;
-
-                        if (styleP != null)
-                            foreach (var kv in styleP)
-                                combined[kv.Key] = kv.Value;
-
-                        foreach (var span in element.Descendants("span").Where(s => s.ParentNode.Name != "span"))
-                        {
-                            ProcessSpan(span, sheet, ref currentRow, combined);
-                        }
-                    }
-                    currentRow++;
-                }
-                
-            }
-            
-        }
-        */
+        }  
 
         private void WriteExcel(Dictionary<string, string> style, string text, IXLWorksheet sheet, ref int currentRow)
         {
@@ -181,7 +131,6 @@ namespace HTML2EXCEL.Infrastructure.Services
                 return;
 
             int col = 1;
-            // int col = MmToCol(ParseMm(style, "left") + ParseMm(style, "margin-left") + ParseMm(style, "padding-left"));
 
             string color = FixColor(style.TryGetValue("color", out var c) ? c : null);
             double fontSize = PxToPt(ExtractNumber(style.TryGetValue("font-size", out var fs) ? fs : "12px"));
@@ -236,10 +185,7 @@ namespace HTML2EXCEL.Infrastructure.Services
                 ?? new Dictionary<string, string>();
 
         private static double PxToPt(double px) => px * 0.75;
-        private static double ParseMm(Dictionary<string, string> styles, string key)
-            => styles.TryGetValue(key, out var v) && v.Contains("mm") ? double.Parse(v.Replace("mm", "")) : 0;
-        private static int MmToRow(double mm) => (int)(mm / 7.5) + 1;
-        private static int MmToCol(double mm) => (int)(mm / 10.5) + 1;
+
         private static double ExtractNumber(string input)
             => double.TryParse(Regex.Match(input, @"\d+").Value, out var num) ? num : 0;
 
@@ -266,38 +212,36 @@ namespace HTML2EXCEL.Infrastructure.Services
             return "FF000000";
         }
 
-
-        private async Task<List<List<string>>> ExtractTopLeftCells(byte[] excelBytes, int rows, int cols)
+        private void WriteTableToExcel(byte[] excelBytes, IXLWorksheet targetSheet, ref int currentRow)
         {
+            currentRow++;
             using var ms = new MemoryStream(excelBytes);
             using var workbook = new XLWorkbook(ms);
-            var ws = workbook.Worksheets.First();
+            var sourceSheet = workbook.Worksheets.First();
 
-            var result = new List<List<string>>();
-            for (int r = 1; r <= rows; r++)
-            {
-                var row = new List<string>();
-                for (int c = 1; c <= cols; c++)
-                {
-                    row.Add(ws.Cell(r, c).GetValue<string>());
-                }
-                result.Add(row);
-            }
-            return result;
-        }
+            int rows = sourceSheet.LastRowUsed().RowNumber();
+            int cols = sourceSheet.LastColumnUsed().ColumnNumber();
 
-        private void WriteTableToExcel(List<List<string>> table, IXLWorksheet sheet, ref int currentRow)
-        {
-            foreach (var row in table)
+            var sourceRange = sourceSheet.Range(1, 1, cols, rows);
+            var targetCell = targetSheet.Cell(currentRow, 1);
+            sourceRange.CopyTo(targetCell);
+
+            int destRowStart = currentRow;
+            int destColStart = 1;
+
+            for (int r = 0; r < rows; r++)
             {
-                int currentCol = 1;
-                foreach (var cellValue in row)
-                {
-                    sheet.Cell(currentRow, currentCol).Value = cellValue;
-                    currentCol++;
-                }
-                currentRow++;
+
+                targetSheet.Row(destRowStart + r).Height = 25;
             }
+
+            for (int c = 0; c < cols; c++)
+            {
+                double width = sourceSheet.Column(c + 1).Width;
+                targetSheet.Column(destColStart + c).Width = width;
+            }
+
+            currentRow += rows;
         }
 
         void ProcessSpan(HtmlNode span, IXLWorksheet sheet, ref int currentRow, Dictionary<string, string> parentStyle)
@@ -327,35 +271,12 @@ namespace HTML2EXCEL.Infrastructure.Services
                 {
                     currentRow++;
                 }
-                else if (node.Name == "span"){
+                else if (node.Name == "span" || node.Name == "u")
+                {
                     ProcessSpan(node, sheet, ref currentRow, combined);
                 }
             }
 
-            /*
-              
-            if (span.Descendants("span").Any())
-            {
-                foreach (var innerSpan in span.ChildNodes.Where(n => n.Name == "span"))
-                {
-                    ProcessSpan(innerSpan, sheet, ref currentRow, combined);
-                }
-            }
-            else
-            {
-                var text = string.Join("", span.ChildNodes
-                    .Where(n => n.NodeType == HtmlNodeType.Text || n.Name == "br")
-                    .Select(n =>
-                        n.Name == "br" ? "\n" : n.InnerText.Trim()
-                    ));
-
-                if (!string.IsNullOrEmpty(text))
-                {
-                    text = System.Net.WebUtility.HtmlDecode(text);
-                    WriteExcel(combined, text, sheet, ref currentRow);
-                }
-            }
-            */
         }
     }
 
