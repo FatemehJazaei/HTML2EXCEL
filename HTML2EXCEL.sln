@@ -8,6 +8,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{9EAFCA8C-BB55-422F-A826-F3264C692336}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doc", "Doc", "{C093B762-9288-407D-A69E-8A5E76B493EA}"
+	ProjectSection(SolutionItems) = preProject
+		HTML2EXCEL.txt = HTML2EXCEL.txt
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{CCF02286-8EC4-43E3-B595-C22902BDA0DB}"
 EndProject

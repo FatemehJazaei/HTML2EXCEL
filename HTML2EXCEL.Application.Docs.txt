@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HTML2EXCEL.Application</name>
+    </assembly>
+    <members>
+        <member name="M:HTML2EXCEL.Application.Handlers.GenerateExcelHandler.HandleAsync(HTML2EXCEL.Application.DTOs.HtmlToExcelRequest)">
+            <summary>
+            Executes the HTML -> Excel use case.
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -25,7 +25,7 @@ namespace HTML2EXCEL.Infrastructure.Services
         private static readonly Regex RgbRegex = new(@"(\d+)", RegexOptions.Compiled);
 
         public async Task<MemoryStream> ParseTablesAsync(string htmlContent, string token, IApiService _apiService,
-        IExcelExporter excelExporter, ITableTemplateRepository _tableTemplateRepository)
+        IExcelExporter excelExporter)
         {
             var doc = new HtmlDocument();
             doc.LoadHtml(htmlContent);
@@ -43,11 +43,14 @@ namespace HTML2EXCEL.Infrastructure.Services
             int pageIndex = 1;
             foreach (var page in pages)
             {
-                Console.WriteLine(pageIndex);
+                int percent = (int)((double)pageIndex / pages.Count * 100);
+                Console.Clear();
+                Console.WriteLine(percent + "%");
+
                 var sheet = workbook.Worksheets.Add($"صفحه {pageIndex}");
                 sheet.RightToLeft = true;
 
-                await ReadDOM(sheet, page, token, _apiService, _tableTemplateRepository);
+                await ReadDOM(sheet, page, token, _apiService);
                 pageIndex++;
             }
 
@@ -56,14 +59,14 @@ namespace HTML2EXCEL.Infrastructure.Services
             stream.Position = 0;
             return await Task.FromResult(stream);
         }
-        private async Task ReadDOM(IXLWorksheet sheet, HtmlNode page, string token, IApiService _apiService, ITableTemplateRepository _tableTemplateRepository)
+        private async Task ReadDOM(IXLWorksheet sheet, HtmlNode page, string token, IApiService _apiService)
         {
             int currentRow = 1;
             var styleDiv = ParseStyle(GetStyle(page));
-            await ProcessDiv(page, sheet, currentRow, token, _apiService, styleDiv, _tableTemplateRepository);
+            _ = await ProcessDiv(page, sheet, currentRow, token, _apiService, styleDiv);
         }
 
-        private async Task ProcessDiv(HtmlNode div, IXLWorksheet sheet, int currentRow, string token, IApiService _apiService, Dictionary<string, string> parentStyle, ITableTemplateRepository _tableTemplateRepository)
+        private async Task<int> ProcessDiv(HtmlNode div, IXLWorksheet sheet, int currentRow, string token, IApiService _apiService, Dictionary<string, string> parentStyle)
         {
             var styleDiv = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             var childStyle = ParseStyle(GetStyle(div));
@@ -86,11 +89,7 @@ namespace HTML2EXCEL.Infrastructure.Services
                     {
                         var model = await _apiService.GetModelAsync(token, tableTemplateId);
                         var filePath = await _apiService.GetFilePathAsync(token, model);
-                        //var (rows, cols) = await _tableTemplateRepository.GetRowANDColCountAsync(tableTemplateId);
                         var excelBytes = await _apiService.DownloadExcelFileAsync(token, filePath);
-                        //var outputFilePath = Path.Combine("output", $"Table_{tableTemplateId}.xlsx");
-                        //await File.WriteAllBytesAsync(outputFilePath, excelBytes);
-
                         WriteTableToExcel(excelBytes, sheet, ref currentRow );
                     }
                 }
@@ -107,22 +106,30 @@ namespace HTML2EXCEL.Infrastructure.Services
                     if (styleP != null)
                         foreach (var kv in styleP)
                             combined[kv.Key] = kv.Value;
-
+                    /*
                     foreach (var span in element.Descendants("span").Where(s => s.ParentNode.Name != "span" && s.ParentNode.Name != "u"))
                     {
                         ProcessSpan(span, sheet, ref currentRow, combined);
                     }
-
-
-                    currentRow++;
+                    */
+                    foreach (var child in element.ChildNodes)
+                    {
+                        if (child.Name == "span" || child.Name == "u")
+                        {
+                            ProcessSpan(child, sheet, ref currentRow, combined);
+                        }
+                        
+                    }
+                    currentRow += 1;
                 }
 
                 else if (element.Name == "div")
                 {
-                    await ProcessDiv(element, sheet, currentRow, token, _apiService, styleDiv, _tableTemplateRepository);
+                    currentRow = await ProcessDiv(element, sheet, currentRow, token, _apiService, styleDiv);
                 }
 
             }
+            return currentRow;
         }  
 
         private void WriteExcel(Dictionary<string, string> style, string text, IXLWorksheet sheet, ref int currentRow)
@@ -214,7 +221,7 @@ namespace HTML2EXCEL.Infrastructure.Services
 
         private void WriteTableToExcel(byte[] excelBytes, IXLWorksheet targetSheet, ref int currentRow)
         {
-            currentRow++;
+            
             using var ms = new MemoryStream(excelBytes);
             using var workbook = new XLWorkbook(ms);
             var sourceSheet = workbook.Worksheets.First();
@@ -269,7 +276,7 @@ namespace HTML2EXCEL.Infrastructure.Services
                 }
                 else if (node.Name == "br")
                 {
-                    currentRow++;
+                   // currentRow++;
                 }
                 else if (node.Name == "span" || node.Name == "u")
                 {

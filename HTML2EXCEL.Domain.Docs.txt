@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HTML2EXCEL.Domain</name>
+    </assembly>
+    <members>
+        <member name="M:HTML2EXCEL.Domain.Interfaces.IApiService.GetModelAsync(System.String,System.Int32)">
+            <summary>
+            Calls the API to fetch a data ID or key from the server.
+            </summary>
+            <param name="token">Authentication token</param>
+            <param name="tableTemplateId">Authentication token</param>
+            <returns>Generated data ID or key</returns>
+        </member>
+        <member name="M:HTML2EXCEL.Domain.Interfaces.IApiService.GetFilePathAsync(System.String,System.String)">
+            <summary>
+            Uses the given key to get a downloadable Excel file Path.
+            </summary>
+            <param name="token">Authentication token</param>
+            <param name="model">Previously obtained key</param>
+            <returns>Excel file Path</returns>
+        </member>
+        <member name="M:HTML2EXCEL.Domain.Interfaces.IApiService.DownloadExcelFileAsync(System.String,System.String)">
+            <summary>
+            Uses the given Path to get a downloadable Excel file .
+            </summary>
+            <param name="token">Authentication token</param>
+            <param name="filePath">Excel file Path</param>
+            <returns>Excel file </returns>
+        </member>
+        <member name="M:HTML2EXCEL.Domain.Interfaces.IAuthService.GetAccessTokenAsync(System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            Authenticate with API using credentials and get access token.
+            </summary>
+            <param name="username">Username or API key</param>
+            <param name="password">Password or secret</param>
+            <returns>Access token string</returns>
+        </member>
+        <member name="M:HTML2EXCEL.Domain.Interfaces.IExcelExporter.SaveAsync(System.IO.MemoryStream,System.String)">
+            <summary>
+            Create an Excel file containing multiple tables.
+            </summary>
+            <param name="tables">List of TableData to export</param>
+            <param name="outputPath">Full file path for Excel output</param>
+        </member>
+        <member name="M:HTML2EXCEL.Domain.Interfaces.IHtmlParser.ParseTablesAsync(System.String,System.String,HTML2EXCEL.Domain.Interfaces.IApiService,HTML2EXCEL.Domain.Interfaces.IExcelExporter)">
+            <summary>
+            Parse HTML string and extract all tables as TableData entities.
+            </summary>
+            <param name="htmlContent">Raw HTML string</param>
+            <returns>List of TableData entities</returns>
+        </member>
+    </members>
+</doc>

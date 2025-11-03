@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UserSecretsId>21d17219-c39b-4c4c-b9b3-70d98f45b45c</UserSecretsId>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <DocumentationFile>E:\Projects\HTML2EXCEL\HTML2EXCEL.ConsoleApp.Docs.txt</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

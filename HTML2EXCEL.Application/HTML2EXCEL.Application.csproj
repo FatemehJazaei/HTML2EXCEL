@@ -4,6 +4,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <DocumentationFile>E:\Projects\HTML2EXCEL\HTML2EXCEL.Application.Docs.txt</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
